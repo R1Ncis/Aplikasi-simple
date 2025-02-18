@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="img/flowers.png" type="image/x-icon" />
+  <title>Flowers</title>
+  <style>
+    /* --- Global Reset --- */
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    /* --- Splash Screen --- */
+    .splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 1s ease;
+      z-index: 1000;
+    }
+    
+    .play-button {
+      width: 80px;
+      height: 80px;
+      background: #ff6b6b;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+      animation: pulse 2s infinite;
+    }
+    
+    .play-button::after {
+      content: '▶';
+      color: white;
+      font-size: 24px;
+      margin-left: 5px;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    .hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+    
+    /* --- Konten Utama --- */
+    .main-content {
+      display: none;
+      /* Membuat konten utama penuh layar dan terpusat */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      padding: 0 20px;
+    }
+    
+    .main-content .greetings,
+    .main-content .description,
+    .main-content .button {
+      width: 100%;
+      margin: 10px 0;
+    }
+    
+    .button button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #ff6b6b;
+      border: none;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      /* Memastikan tombol berada di tengah */
+      display: inline-block;
+      margin: 0 auto;
+    }
+    
+    .button button:hover {
+      background-color: #ff4c4c;
+    }
+    
+    /* --- Scene Interaktif --- */
+    #interactiveScene {
+      position: relative;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #ffffff;
+      font-size: 18px;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    #interactiveScene.hidden {
+      display: none;
+    }
+    
+    #interactiveScene button {
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #ff6b6b;
+      border: none;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    
+    #interactiveScene button:hover {
+      background-color: #ff4c4c;
+    }
+    
+    /* --- Styling untuk Message Container --- */
+    #messageContainer {
+      position: relative;
+      z-index: 10;
+      max-width: 80%;
+      margin: auto;
+      text-align: center;
+      word-wrap: break-word;
+      line-height: 1.5;
+    }
+    
+    /* --- Container untuk Animasi Bintang --- */
+    #starAnimations {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+      overflow: hidden;
+    }
+    
+    /* --- Animasi Falling Star (Milkyway Style) --- */
+    .milkyway-star {
+      position: absolute;
+      font-size: 32px;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(255,255,255,0.8);
+      animation: milkywayFall 3s linear forwards;
+    }
+    
+    @keyframes milkywayFall {
+      0% {
+        top: -50px;
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        top: 100vh;
+        opacity: 0;
+        transform: translateX(50px) scale(0.5);
+      }
+    }
+    
+    /* --- Animasi Star Field (Banyak Bintang) --- */
+    .star-field {
+      position: absolute;
+      font-size: 20px;
+      color: #fff;
+      text-shadow: 0 0 5px rgba(255,255,255,0.8);
+      animation: starFall linear infinite;
+    }
+    
+    @keyframes starFall {
+      0% { top: -10px; opacity: 0; }
+      10% { opacity: 1; }
+      100% { top: 100vh; opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Splash Screen dengan Tombol Play -->
+  <div class="splash-screen" id="splashScreen">
+    <div class="play-button" id="playButton"></div>
+  </div>
+  
+  <!-- Konten Utama -->
+  <div class="main-content" id="mainContent">
+    <!-- Tambahkan attribute loop untuk musik agar terus berulang -->
+    <audio id="backgroundMusic" loop>
+      <source src="audio/Zendaya 'Neverland'.mp3" type="audio/mp3" />
+      Browser kamu tidak mendukung pemutar audio.
+    </audio>
+    
+    <div class="greetings">
+      <span>N</span>
+      <span>U</span>
+      <span>R</span>
+      <span>I</span>
+      <span>N</span>
+      <span>A</span>
+    </div>
+    <div class="description">
+      <span>sayang, aku ada hadiah spesial buat sayang ni :)</span>
+    </div>
+    <div class="button">
+      <!-- Tombol untuk memunculkan scene interaktif -->
+      <button id="transitionButton">Klik disini</button>
+    </div>
+  </div>
+  
+  <!-- Scene Interaktif -->
+  <div id="interactiveScene" class="hidden">
+    <!-- Container untuk animasi bintang -->
+    <div id="starAnimations"></div>
+    <!-- Message Container -->
+    <div id="messageContainer">Selamat datang di scene baru!</div>
+  </div>
+  
+  <script>
+    // --- Kontrol Splash Screen dan Musik ---
+    const splashScreen = document.getElementById('splashScreen');
+    const playButton = document.getElementById('playButton');
+    const mainContent = document.getElementById('mainContent');
+    const backgroundMusic = document.getElementById('backgroundMusic');
+    
+    playButton.addEventListener('click', () => {
+      backgroundMusic.play();
+      splashScreen.classList.add('hidden');
+      setTimeout(() => {
+        mainContent.classList.add('show-content');
+      }, 1000);
+    });
+    
+    // --- Transisi ke Scene Interaktif ---
+    const transitionButton = document.getElementById('transitionButton');
+    const interactiveScene = document.getElementById('interactiveScene');
+    
+    transitionButton.addEventListener('click', () => {
+      mainContent.classList.remove('show-content');
+      mainContent.style.display = 'none';
+      interactiveScene.classList.remove('hidden');
+      initInteractiveScene();
+    });
+    
+    // --- Logika Scene Interaktif ---
+    const messageContainer = document.getElementById('messageContainer');
+    const starAnimations = document.getElementById('starAnimations');
+    const messages = [
+      "hai wanita tercantikku",
+      "Selamat ulang tahun sayangku",
+      "maaf ya beberapa hari ini aku sibuk terus",
+      "nyatanya aku sibuk bikin ini hehe",
+      "maaf ya bohong :) jangan marah ya cantik",
+      "oh iya ini nanti akan ada yang muncul pas jam 23.00 WIB, tunggu ya sayang jangan di close",
+      "hehe engga engga bercanda, kelamaan ya mesti",
+      "aku tau kok kalo sayang orangnya gak sabaran :)",
+      "aku ingin di hari ini",
+      "menjadi hari yang spesial buat sayang",
+      "oh ya bentar lagi ada bintang jatuh",
+      "jangan lupa berdoa ya sayang",
+      "yah dah lewat ya",
+      "sempet berdoa gak tadi?",
+      "mau bintang jatuh lagi?",
+      "ya udah siap siap ya",
+      "ni aku kirimin bitang jatuh yang bannyak, berdoa yang banyak ya sayang",
+      "dah belom? kok maruk banget berdoanya",
+      "ya udah aku biarin ya bintangnya jatuh terus, biar kamu bisa berdoa terus :)",
+      "toh ini hari spesial sayang :)",
+      "percaya gak sayang ini bintangnya ada lebih dari 1000 aku buatnya",
+      "kalo gak percaya coba hitung aja sendiri :p",
+      "maaf ya sayang aku gak bisa di deket sayang hari ini",
+      "oh iya, aku tau sayang suka banget sama bunga",
+      "dan sayang katanya mau pacaran sama anak teknik kan?",
+      "aku sebagai anak teknik kalo ngasi bunga pengen beda sama yang lain",
+      "jadi semoga bunga yang aku kasi ini sayang suka ya :)"
+    ];
+    let currentMessageIndex = 0;
+    let interactiveCompleted = false;
+    let starFieldInterval = null; // untuk animasi bintang jatuh yang banyak
+    
+    function initInteractiveScene() {
+      currentMessageIndex = 0;
+      interactiveCompleted = false;
+      updateMessage();
+    }
+    
+    function updateMessage() {
+      // Jika currentMessageIndex kurang dari 16, bersihkan starAnimations dan hentikan star field (jika ada)
+      if (currentMessageIndex < 16) {
+        if (starFieldInterval) {
+          clearInterval(starFieldInterval);
+          starFieldInterval = null;
+        }
+        starAnimations.innerHTML = '';
+      }
+      // Penanganan pesan khusus
+      if (currentMessageIndex === 10) {
+        // Pesan: "oh ya bentar lagi ada bintang jatuh" dengan jeda 2 detik untuk animasi milkyway
+        messageContainer.textContent = messages[currentMessageIndex];
+        setTimeout(showMilkywayStar, 2000);
+      } else if (currentMessageIndex === 14) {
+        // Pesan: "mau bintang jatuh lagi?" dengan dua tombol
+        messageContainer.innerHTML = messages[currentMessageIndex] +
+          "<br><button id='yesButton'>mau Banget</button> <button id='noButton'>gak mau</button>";
+        document.getElementById('yesButton').addEventListener('click', (e) => {
+          e.stopPropagation();
+          nextMessage();
+        });
+        const noBtn = document.getElementById('noButton');
+        // Pastikan tombol "gak mau" selalu positioned secara absolut
+        noBtn.style.position = 'absolute';
+        noBtn.addEventListener('mouseover', repositionNoButton);
+        noBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          repositionNoButton();
+        });
+        // Tambahkan event listener untuk perangkat sentuh
+        noBtn.addEventListener('touchstart', (e) => {
+          e.stopPropagation();
+          repositionNoButton();
+        });
+      } else if (currentMessageIndex === 16) {
+        // Pesan: "ni aku kirimin bitang jatuh yang bannyak, berdoa yang banyak ya sayang"
+        messageContainer.textContent = messages[currentMessageIndex];
+        // Mulai animasi star field, dan biarkan terus berjalan sampai final
+        if (!starFieldInterval) {
+          starFieldInterval = setInterval(spawnStar, 500);
+        }
+      } else {
+        messageContainer.textContent = messages[currentMessageIndex];
+      }
+    }
+    
+    function nextMessage() {
+      if (interactiveCompleted) return;
+      currentMessageIndex++;
+      if (currentMessageIndex < messages.length) {
+        updateMessage();
+      } else {
+        interactiveCompleted = true;
+        // Hentikan star field jika aktif
+        if (starFieldInterval) {
+          clearInterval(starFieldInterval);
+          starFieldInterval = null;
+        }
+        messageContainer.innerHTML = '<button id="finalButton">Klik disini</button>';
+        document.getElementById('finalButton').addEventListener('click', (event) => {
+          event.stopPropagation();
+          // Alih-alih mengganti halaman (yang akan menghentikan musik), kita muat flower.html di dalam iframe.
+          interactiveScene.style.display = 'none';
+          const iframe = document.createElement('iframe');
+          iframe.src = 'flower.html';
+          iframe.style.position = 'fixed';
+          iframe.style.top = '0';
+          iframe.style.left = '0';
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.border = 'none';
+          // Opsional: tambahkan z-index jika perlu
+          iframe.style.zIndex = '2000';
+          document.body.appendChild(iframe);
+        });
+      }
+    }
+    
+    // Klik di area scene (selain saat pesan 14 dengan tombol) untuk melanjutkan pesan
+    interactiveScene.addEventListener('click', (e) => {
+      if (currentMessageIndex === 14) return;
+      nextMessage();
+    });
+    
+    // Fungsi untuk memindahkan tombol "gak mau" secara acak dalam frame
+    function repositionNoButton() {
+      const noButton = document.getElementById('noButton');
+      const containerWidth = interactiveScene.clientWidth;
+      const containerHeight = interactiveScene.clientHeight;
+      const btnWidth = noButton.offsetWidth;
+      const btnHeight = noButton.offsetHeight;
+      const newLeft = Math.random() * (containerWidth - btnWidth);
+      const newTop = Math.random() * (containerHeight - btnHeight);
+      noButton.style.left = newLeft + 'px';
+      noButton.style.top = newTop + 'px';
+    }
+    
+    // Fungsi untuk menampilkan satu animasi bintang jatuh bergaya milkyway
+    function showMilkywayStar() {
+      const star = document.createElement('div');
+      star.className = 'milkyway-star';
+      star.textContent = '★';
+      // Posisi horizontal acak antara 10% hingga 90%
+      star.style.left = (Math.random() * 80 + 10) + '%';
+      starAnimations.appendChild(star);
+      star.addEventListener('animationend', () => {
+        star.remove();
+      });
+    }
+    
+    // Fungsi untuk memunculkan satu bintang jatuh (star field) secara acak
+    function spawnStar() {
+      const star = document.createElement('div');
+      star.className = 'star-field';
+      star.textContent = '★';
+      star.style.left = Math.random() * 100 + '%';
+      const duration = 3 + Math.random() * 4; // durasi antara 3s sampai 7s
+      star.style.animationDuration = duration + 's';
+      const delay = Math.random() * 3;
+      star.style.animationDelay = delay + 's';
+      starAnimations.appendChild(star);
+      star.addEventListener('animationend', () => star.remove());
+    }
+  </script>
+</body>
+</html>
